@@ -1,7 +1,7 @@
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
+import Sidebar from "../../components/layout/Sidebar.jsx";
+import Navbar from "../../components/layout/Navbar.jsx";
 
-export default function DashboardLayout({children, setActivePage}) {
+export default function Home({children, setActivePage}) {
     return (
         <div className="h-screen w-full bg-white flex overflow-hidden">
             <Sidebar setActivePage={setActivePage}/>

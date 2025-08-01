@@ -1,12 +1,12 @@
 import {useState} from "react";
-import DashboardLayout from "./layouts/DashboardLayout";
-import Forms from "./pages/ListForms";
+import Dashboard from "./pages/Home/Home.jsx";
+import Forms from "./pages/Lista/Lista.jsx";
 
 export default function App() {
     const [activePage, setActivePage] = useState("home");
 
     return (
-        <DashboardLayout setActivePage={setActivePage}>
+        <Dashboard setActivePage={setActivePage}>
             <div className={activePage === "perfil" ? "block" : "hidden"}>
                 Perfil do usuário
             </div>
@@ -19,6 +19,6 @@ export default function App() {
             <div className={activePage === "configuracoes" ? "block" : "hidden"}>
                 Configurações do sistema
             </div>
-        </DashboardLayout>
+        </Dashboard>
     );
 }
