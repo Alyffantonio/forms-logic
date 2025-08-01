@@ -1,8 +1,8 @@
 import {useEffect, useState} from "react";
-import ModalForms from "./modal_forms/ModalForms";
+import Modal from "./Forms/Modal.jsx";
 
 // npm install @fontsource/inter
-export default function ListForms() {
+export default function Lista() {
     const [formularios, setFormularios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,7 +80,7 @@ export default function ListForms() {
                     </table>
                 </div>
             )}
-            {isModalOpen && <ModalForms onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} />}
         </div>
     );
 }

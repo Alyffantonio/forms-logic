@@ -1,4 +1,4 @@
-import minhaFoto from "../assets/baixados.png";
+import minhaFoto from "../../assets/baixados.png";
 import {FaGithub, FaLinkedin} from "react-icons/fa";
 
 export default function Header() {
