@@ -1,0 +1,43 @@
+import React from 'react';
+
+export default function CheckBox ({ campo, index, visibilidadeCondicionais, visibilidadeCondicional, alterarCampo }) {
+
+  return (
+    <div className="flex items-center space-x-6">
+        <div className="flex items-center">
+            <input type="checkbox" name="capitalizar"
+                   id={`capitalizar_${index}`} checked={campo.capitalizar || false}
+                   onChange={e => alterarCampo(index, e)}
+                   className="h-4 w-4 rounded border-gray-300"/>
+            <label htmlFor={`capitalizar_${index}`}
+                   className="ml-2 block text-sm text-gray-900">Capitalizar</label>
+        </div>
+        <div className="flex items-center">
+            <input type="checkbox" name="obrigatorio"
+                   id={`obrigatorio_${index}`} checked={campo.obrigatorio || false}
+                   onChange={e => alterarCampo(index, e)}
+                   className="h-4 w-4 rounded border-gray-300"/>
+            <label htmlFor={`obrigatorio_${index}`}
+                   className="ml-2 block text-sm text-gray-900">Obrigatório</label>
+        </div>
+        <div className="flex items-center">
+            <input type="checkbox" name="multilinha"
+                   id={`multilinha_${index}`} checked={campo.multilinha || false}
+                   onChange={e => alterarCampo(index, e)}
+                   className="h-4 w-4 rounded border-gray-300"/>
+            <label htmlFor={`multilinha_${index}`}
+                   className="ml-2 block text-sm text-gray-900">Multilinha</label>
+        </div>
+        <div className="flex items-center">
+            <input
+                type="checkbox"
+                id={`condicionais_${index}`}
+                checked={visibilidadeCondicionais[index] || false}
+                onChange={() => visibilidadeCondicional(index)}
+                className="h-4 w-4 rounded border-gray-300"
+            />
+            <label htmlFor={`condicionais_${index}`} className="ml-2 block text-sm text-gray-900">Condicionais</label>
+        </div>
+    </div>
+  );
+}

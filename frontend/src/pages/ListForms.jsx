@@ -1,8 +1,11 @@
 import {useEffect, useState} from "react";
+import ModalForms from "./modal_forms/ModalForms";
+
 // npm install @fontsource/inter
-export default function Forms() {
+export default function ListForms() {
     const [formularios, setFormularios] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         fetch("http://localhost:3000/api/formularios")
@@ -24,7 +27,7 @@ export default function Forms() {
                 <h1 className="font-sans text-2xl font-bold text-gray-800">
                     Lista de Formulários
                 </h1>
-                <button type="button" className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700  dark:border-gray-700">
+                <button type="button" onClick={() => setIsModalOpen(true)} className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700  dark:border-gray-700">
                     Novo Formulário
                 </button>
             </div>
@@ -77,6 +80,7 @@ export default function Forms() {
                     </table>
                 </div>
             )}
+            {isModalOpen && <ModalForms onClose={() => setIsModalOpen(false)} />}
         </div>
     );
 }
