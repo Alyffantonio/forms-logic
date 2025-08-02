@@ -1,7 +1,9 @@
 import React from "react";
-import Formula from "./Formula.jsx";
+import Formula from "./formula/Formula.jsx";
+import Opcoes from "./opcoes/Opcoes.jsx"
+import CheckBox from "./CheckBox.jsx";
 
-export default function CamposFixos({campo, index, alterarCampo}) {
+export default function CamposFixos({campo, index, alterarCampo, adicionarOpcao, alterarOpcao, removerOpcao}) {
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -52,10 +54,20 @@ export default function CamposFixos({campo, index, alterarCampo}) {
                 </select>
             </div>
 
+            <CheckBox campo={campo} index={index} alterarCampo={alterarCampo}/>
+
             {campo.tipo === 'calculated' && <Formula
                 campo={campo}
                 index={index}
                 alterarCampo={alterarCampo}
+            />}
+
+            {campo.tipo === 'select' && <Opcoes
+                campo={campo}
+                index={index}
+                adicionarOpcao={adicionarOpcao}
+                alterarOpcao={alterarOpcao}
+                removerOpcao={removerOpcao}
             />}
 
         </>

@@ -45,6 +45,7 @@ export default function Modal({onClose}) {
         }));
     }
 
+
     /** ==================== CONDICIONAIS ==================== **/
     function adicionarCondicional(campoIndex) {
         const camposAtualizados = [...formState.campos];
@@ -69,6 +70,7 @@ export default function Modal({onClose}) {
         camposAtualizados[campoIndex].condicionais[condicionalIndex][name] = value;
         setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
+
 
     /** ==================== VALIDAÇÕES ==================== **/
     function adicionarValidacao(campoIndex) {
@@ -107,6 +109,30 @@ export default function Modal({onClose}) {
         console.log("Estado final do formulário:", JSON.stringify(formState, null, 2));
         alert('salvaaaaaaaaaaaaaaaaaaaa');
         onClose();
+    }
+
+    function adicionarOpcao(campoIndex) {
+        const camposAtualizados = [...formState.campos];
+        camposAtualizados[campoIndex].opcoes = camposAtualizados[campoIndex].opcoes || [];
+        camposAtualizados[campoIndex].opcoes.push({
+            id: Date.now() + Math.random(),
+            label: "",
+            valor: ""
+        });
+        setFormState(prev => ({...prev, campos: camposAtualizados}));
+    }
+
+    function removerOpcao(campoIndex, opcaoIndex) {
+        const camposAtualizados = [...formState.campos];
+        camposAtualizados[campoIndex].opcoes.splice(opcaoIndex, 1);
+        setFormState(prev => ({...prev, campos: camposAtualizados}));
+    }
+
+    function alterarOpcao(campoIndex, opcaoIndex, event) {
+        const {name, value} = event.target;
+        const camposAtualizados = [...formState.campos];
+        camposAtualizados[campoIndex].opcoes[opcaoIndex][name] = value;
+        setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
 
     return (
@@ -152,6 +178,7 @@ export default function Modal({onClose}) {
                                         {formState.campos.map((campo, index) => (
                                             <div key={campo.temp_id}
                                                  className="p-4 border rounded-md bg-gray-50 space-y-3 relative">
+
                                                 <button type="button" onClick={() => removerCampo(index)}
                                                         className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                                                         title="Remover Campo">
@@ -163,33 +190,29 @@ export default function Modal({onClose}) {
                                                     </svg>
                                                 </button>
 
-                                                <CamposFixos campo={campo} index={index} alterarCampo={alterarCampo}/>
+                                                <CamposFixos
+                                                    campo={campo}
+                                                    index={index}
+                                                    alterarCampo={alterarCampo}
+                                                    adicionarOpcao={adicionarOpcao}
+                                                    alterarOpcao={alterarOpcao}
+                                                    removerOpcao={removerOpcao}
+                                                />
 
+                                                <Condicional campo={campo} index={index}
+                                                             camposDisponiveis={formState.campos.filter((c, i) => i !== index && c.id)}
+                                                             adicionarCondicional={adicionarCondicional}
+                                                             alterarCondicional={alterarCondicional}
+                                                             removerCondicional={removerCondicional}
+                                                />
 
-                                                <div
-                                                    className="mt-1 p-2 border-t grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                                                    <CheckBox campo={campo} index={index} alterarCampo={alterarCampo}/>
-                                                </div>
-
-                                                <div
-                                                    className="mt-1 p-2 border-t grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                                                    <Condicional campo={campo} index={index}
-                                                                 camposDisponiveis={formState.campos.filter((c, i) => i !== index && c.id)}
-                                                                 adicionarCondicional={adicionarCondicional}
-                                                                 alterarCondicional={alterarCondicional}
-                                                                 removerCondicional={removerCondicional}
-                                                    />
-                                                </div>
-
-                                                <div className="mt-1 p-2 border-t grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                                                    <Validacao
-                                                        campo={campo}
-                                                        index={index}
-                                                        adicionarValidacao={adicionarValidacao}
-                                                        alterarValidacao={alterarValidacao}
-                                                        removerValidacao={removerValidacao}
-                                                    />
-                                                </div>
+                                                <Validacao
+                                                    campo={campo}
+                                                    index={index}
+                                                    adicionarValidacao={adicionarValidacao}
+                                                    alterarValidacao={alterarValidacao}
+                                                    removerValidacao={removerValidacao}
+                                                />
 
                                             </div>
                                         ))}
@@ -232,9 +255,7 @@ export default function Modal({onClose}) {
                             {formState.descricao || "Descrição do formulário aqui"}
                         </p>
                     </div>
-                    <div className="w-full mt-4 p-4 border-t">
-                        <FormularioPreview campos={formState.campos}/>
-                    </div>
+                    <FormularioPreview campos={formState.campos}/>
                 </div>
             </div>
         </div>
