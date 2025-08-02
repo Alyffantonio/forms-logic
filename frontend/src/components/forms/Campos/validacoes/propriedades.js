@@ -29,6 +29,6 @@ export const  validacoesPorTipo = {
   ],
   calculated: [
     { value: "igual_a", label: "Igual a", campos: ["valor"] },
-    { value: "intervalo_valido", label: "Intervalo válido", campos: ["min", "max"] }
+    { value: "intervalo_valido", label: "Intervalo válido", campos: ["min", "max"] },
   ]
 };

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import Modal from "./Forms/Modal.jsx";
+import Modal from "../../components/forms/Modal.jsx";
 
 // npm install @fontsource/inter
 export default function Lista() {
@@ -37,7 +37,6 @@ export default function Lista() {
             ) : (
                 <div className="relative overflow-x-auto rounded-lg ">
                     <table className="w-full text-sm text-left text-gray-300">
-                        {/* Cabeçalho estilo cinza escuro */}
                         <thead className="text-xs uppercase bg-[#334155] text-gray-400">
                         <tr>
                             <th scope="col" className="px-6 py-3">Nome</th>
