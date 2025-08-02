@@ -1,6 +1,6 @@
 import {useState} from "react";
-import Dashboard from "./pages/Home/Home.jsx";
-import Forms from "./pages/Lista/Lista.jsx";
+import Dashboard from "./pages/home/Home.jsx";
+import Forms from "./pages/lista/Lista.jsx";
 
 export default function App() {
     const [activePage, setActivePage] = useState("home");

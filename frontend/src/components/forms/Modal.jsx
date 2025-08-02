@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import CheckBox from './Campos/CheckBox.jsx';
-import Condicional from "./Campos/Condicionais.jsx";
-import Validacao from "./Campos/Validacao.jsx";
-import CamposFixos from "./Campos/CamposFixos.jsx";
+import CheckBox from './campos/CheckBox.jsx';
+import Condicional from "./campos/Condicionais.jsx";
+import Validacao from "./campos/Validacao.jsx";
+import CamposFixos from "./campos/CamposFixos.jsx";
+import FormularioPreview from './visualizar/FormularioPreview.jsx';
 
 export default function Modal({onClose}) {
     const [formState, setFormState] = useState({
@@ -17,6 +18,7 @@ export default function Modal({onClose}) {
             id: '',
             label: '',
             tipo: 'text',
+            formula: '',
             obrigatorio: false,
             capitalizar: false,
             multilinha: false,
@@ -103,7 +105,7 @@ export default function Modal({onClose}) {
     function enviarFormulario(event) {
         event.preventDefault();
         console.log("Estado final do formulário:", JSON.stringify(formState, null, 2));
-        alert('Formulário salvo! (Verifique o console)');
+        alert('salvaaaaaaaaaaaaaaaaaaaa');
         onClose();
     }
 
@@ -120,7 +122,6 @@ export default function Modal({onClose}) {
                     </svg>
                 </button>
 
-                {/* Painel do Formulário */}
                 <div className="w-full lg:w-1/2 flex bg-white">
                     <div className="w-full h-full flex flex-col">
                         <div className="flex-grow p-8 overflow-y-auto">
@@ -180,8 +181,7 @@ export default function Modal({onClose}) {
                                                     />
                                                 </div>
 
-                                                <div
-                                                    className="mt-1 p-2 border-t grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                                                <div className="mt-1 p-2 border-t grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                                                     <Validacao
                                                         campo={campo}
                                                         index={index}
@@ -190,6 +190,7 @@ export default function Modal({onClose}) {
                                                         removerValidacao={removerValidacao}
                                                     />
                                                 </div>
+
                                             </div>
                                         ))}
                                     </div>
@@ -221,7 +222,8 @@ export default function Modal({onClose}) {
                     </div>
                 </div>
 
-                <div className="hidden lg:flex flex-col items-center justify-start flex-1 bg-gray-50 text-black p-8">
+                <div
+                    className="hidden lg:flex flex-col items-center justify-start flex-1 bg-gray-50 text-black p-8 overflow-y-auto">
                     <div className="text-center w-full">
                         <h1 className="text-2xl font-semibold mb-2 text-black text-center">
                             {formState.nome || "Nome do formulário"}
@@ -229,6 +231,9 @@ export default function Modal({onClose}) {
                         <p className="text-sm mb-6 text-gray-500 text-center">
                             {formState.descricao || "Descrição do formulário aqui"}
                         </p>
+                    </div>
+                    <div className="w-full mt-4 p-4 border-t">
+                        <FormularioPreview campos={formState.campos}/>
                     </div>
                 </div>
             </div>
