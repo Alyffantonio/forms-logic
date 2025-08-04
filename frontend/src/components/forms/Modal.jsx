@@ -4,6 +4,8 @@ import Condicional from "./campos/Condicionais.jsx";
 import Validacao from "./campos/Validacao.jsx";
 import CamposFixos from "./campos/CamposFixos.jsx";
 import FormularioPreview from './visualizar/FormularioPreview.jsx';
+import Formula from "./Campos/formula/Formula.jsx";
+import Opcoes from "./Campos/opcoes/Opcoes.jsx"
 
 export default function Modal({onClose}) {
     const [formState, setFormState] = useState({
@@ -11,6 +13,9 @@ export default function Modal({onClose}) {
         descricao: '',
         campos: [],
     });
+
+    const [construtorCondicao, setConstrutorCondicao] = useState({});
+
 
     function adicionarCampo() {
         const novoCampo = {
@@ -23,7 +28,8 @@ export default function Modal({onClose}) {
             capitalizar: false,
             multilinha: false,
             validacoes: [],
-            condicionais: [],
+            condicional: "",
+            dependencias: [],
         };
         setFormState(prev => ({...prev, campos: [...prev.campos, novoCampo]}));
     }
@@ -47,30 +53,45 @@ export default function Modal({onClose}) {
 
 
     /** ==================== CONDICIONAIS ==================== **/
-    function adicionarCondicional(campoIndex) {
+    function limparCondicional(campoIndex) {
         const camposAtualizados = [...formState.campos];
-        camposAtualizados[campoIndex].condicionais.push({
-            id: Date.now() + Math.random(),
-            campo: "",
-            operador: "",
-            valor: ""
-        });
+        camposAtualizados[campoIndex].condicional = '';
         setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
 
-    function removerCondicional(campoIndex, condicionalIndex) {
-        const camposAtualizados = [...formState.campos];
-        camposAtualizados[campoIndex].condicionais.splice(condicionalIndex, 1);
-        setFormState(prev => ({...prev, campos: camposAtualizados}));
+    function atualizarConstrutor(targetIndex, parte, valor) {
+        setConstrutorCondicao(prevState => ({
+            ...prevState,
+            [targetIndex]: {
+                ...prevState[targetIndex],
+                [parte]: valor
+            }
+        }));
     }
 
-    function alterarCondicional(campoIndex, condicionalIndex, event) {
-        const {name, value} = event.target;
-        const camposAtualizados = [...formState.campos];
-        camposAtualizados[campoIndex].condicionais[condicionalIndex][name] = value;
-        setFormState(prev => ({...prev, campos: camposAtualizados}));
-    }
+    function inserirCondicao(targetIndex) {
+        const condicao = construtorCondicao[targetIndex];
+        if (!condicao || !condicao.campo || !condicao.operador || !condicao.valor) {
+            alert("Por favor, preencha todas as partes da condição.");
+            return;
+        }
 
+        let valorFormatado = condicao.valor;
+        if (isNaN(valorFormatado) && valorFormatado !== 'true' && valorFormatado !== 'false') {
+            valorFormatado = `'${valorFormatado}'`;
+        }
+
+        const novaRegra = `${condicao.campo} ${condicao.operador} ${valorFormatado}`;
+        const camposAtualizados = [...formState.campos];
+        const condicionalAtual = camposAtualizados[targetIndex].condicional || '';
+        camposAtualizados[targetIndex].condicional = (condicionalAtual ? condicionalAtual + ' && ' : '') + novaRegra;
+        setFormState(prev => ({...prev, campos: camposAtualizados}));
+
+        setConstrutorCondicao(prevState => ({
+            ...prevState,
+            [targetIndex]: {}
+        }));
+    }
 
     /** ==================== VALIDAÇÕES ==================== **/
     function adicionarValidacao(campoIndex) {
@@ -96,6 +117,7 @@ export default function Modal({onClose}) {
         setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
 
+    /** ==================== campos ==================== **/
     function atualizarCampo(event) {
         const {name, value} = event.target;
         setFormState(prev => ({
@@ -111,6 +133,7 @@ export default function Modal({onClose}) {
         onClose();
     }
 
+    /** ==================== opções ==================== **/
     function adicionarOpcao(campoIndex) {
         const camposAtualizados = [...formState.campos];
         camposAtualizados[campoIndex].opcoes = camposAtualizados[campoIndex].opcoes || [];
@@ -133,6 +156,31 @@ export default function Modal({onClose}) {
         const camposAtualizados = [...formState.campos];
         camposAtualizados[campoIndex].opcoes[opcaoIndex][name] = value;
         setFormState(prev => ({...prev, campos: camposAtualizados}));
+    }
+
+    /** ==================== dependencia ==================== **/
+    function adicionarDependencia(campoIndex) {
+        const camposAtualizados = [...formState.campos];
+
+        if (!camposAtualizados[campoIndex].dependencias) {
+            camposAtualizados[campoIndex].dependencias = [];
+        }
+
+        camposAtualizados[campoIndex].dependencias.push("");
+        setFormState(prev => ({...prev, campos: camposAtualizados}));
+    }
+
+    function removerDependencia(campoIndex, dependenciaIndex) {
+        const camposAtualizados = [...formState.campos]
+        camposAtualizados[campoIndex].dependencias.splice(dependenciaIndex, 1)
+        setFormState(prev => ({...prev, campos: camposAtualizados}));
+    }
+
+    function alterarDependencia(campoIndex, dependenciaIndex, event) {
+        const {value} = event.target
+        const camposAtualizados = [...formState.campos]
+        camposAtualizados[campoIndex].dependencias[dependenciaIndex] = value;
+        setFormState(prev => ({...prev, campos: camposAtualizados}))
     }
 
     return (
@@ -194,16 +242,36 @@ export default function Modal({onClose}) {
                                                     campo={campo}
                                                     index={index}
                                                     alterarCampo={alterarCampo}
+                                                />
+
+                                                <CheckBox campo={campo} index={index} alterarCampo={alterarCampo}/>
+
+                                                {campo.tipo === 'calculated' && <Formula
+                                                    campo={campo}
+                                                    index={index}
+                                                    alterarCampo={alterarCampo}
+                                                    camposDisponiveis={formState.campos.filter((c, i) => i !== index && c.id)}
+                                                    adicionarDependencia={adicionarDependencia}
+                                                    removerDependencia={removerDependencia}
+                                                    alterarDependencia={alterarDependencia}
+                                                />}
+
+                                                {campo.tipo === 'select' && <Opcoes
+                                                    campo={campo}
+                                                    index={index}
                                                     adicionarOpcao={adicionarOpcao}
                                                     alterarOpcao={alterarOpcao}
                                                     removerOpcao={removerOpcao}
-                                                />
+                                                />}
 
-                                                <Condicional campo={campo} index={index}
-                                                             camposDisponiveis={formState.campos.filter((c, i) => i !== index && c.id)}
-                                                             adicionarCondicional={adicionarCondicional}
-                                                             alterarCondicional={alterarCondicional}
-                                                             removerCondicional={removerCondicional}
+                                                <Condicional
+                                                    campo={campo}
+                                                    index={index}
+                                                    camposDisponiveis={formState.campos.filter((c, i) => i !== index && c.id)}
+                                                    construtorCondicao={construtorCondicao}
+                                                    atualizarConstrutor={atualizarConstrutor}
+                                                    inserirCondicao={inserirCondicao}
+                                                    limparCondicional={limparCondicional}
                                                 />
 
                                                 <Validacao
