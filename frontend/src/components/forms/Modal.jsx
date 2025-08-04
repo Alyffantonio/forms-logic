@@ -99,7 +99,6 @@ export default function Modal({onClose}) {
         camposAtualizados[campoIndex].validacoes.push({
             id: Date.now() + Math.random(),
             tipo: "",
-            valor: ""
         });
         setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
@@ -128,9 +127,38 @@ export default function Modal({onClose}) {
 
     function enviarFormulario(event) {
         event.preventDefault();
-        console.log("Estado final do formulário:", JSON.stringify(formState, null, 2));
-        alert('salvaaaaaaaaaaaaaaaaaaaa');
-        onClose();
+
+        // Cria uma cópia profunda para não alterar o estado original
+        const formStateLimpo = JSON.parse(JSON.stringify(formState));
+
+        // Percorre cada campo para fazer a limpeza
+        formStateLimpo.campos.forEach(campo => {
+            // 1. Remove o temp_id principal do campo
+            delete campo.temp_id;
+
+            // 2. Se houver validações, percorre e remove o id de cada uma
+            if (campo.validacoes) {
+                campo.validacoes.forEach(validacao => {
+                    delete validacao.id;
+                });
+            }
+
+            // 3. Se houver opções, percorre, remove o id e corrige 'valor' para 'value'
+            if (campo.opcoes) {
+                campo.opcoes.forEach(opcao => {
+                    delete opcao.id;
+                    // Corrige a chave 'valor' para 'value', se necessário
+                    if ('valor' in opcao) {
+                        opcao.value = opcao.valor;
+                        delete opcao.valor;
+                    }
+                });
+            }
+        });
+
+        console.log("Estado final do formulário (limpo):", JSON.stringify(formStateLimpo, null, 2));
+        // alert('Formulário Salvo!');
+        // onClose();
     }
 
     /** ==================== opções ==================== **/
