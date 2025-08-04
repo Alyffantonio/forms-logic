@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
 function avaliarCondicao(condicaoString, respostas) {
     if (!condicaoString) {
@@ -9,14 +9,12 @@ function avaliarCondicao(condicaoString, respostas) {
 
     for (const cond of condicoes) {
 
-        // Tenta extrair as partes: campo, operador, valor
         const match = cond.match(/(\w+)\s*([<>=!]+)\s*(.*)/);
         if (!match) continue;
 
         const [, campoId, operador, valorCondicao] = match;
         const valorResposta = respostas[campoId];
 
-        // Remove aspas simples do valor da condição se houver
         const valorLimpo = valorCondicao.replace(/'/g, '');
 
         let resultado = false;
@@ -48,28 +46,42 @@ function avaliarCondicao(condicaoString, respostas) {
     return true;
 }
 
+function tituloUpper(string) {
+    if (!string) return "";
+    return string.replace(
+        /\w\S*/g,
+        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+}
 
-export default function FormularioPreview({ campos }) {
+export default function FormularioPreview({campos}) {
     const [respostas, setRespostas] = useState({});
 
-    function handleRespostaChange(event) {
-        const { name, value, type, checked } = event.target;
+    function respostaChange(event, campoDefinicao) {
+        const {name, value, type, checked} = event.target;
+
+        let valorFinal = type === 'checkbox' ? checked : value;
+
+        if (campoDefinicao && campoDefinicao.tipo === 'text' && campoDefinicao.capitalizar) {
+            valorFinal = tituloUpper(value)
+        }
+
         setRespostas(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: valorFinal
         }));
     }
 
     return (
         <form className="w-full space-y-4">
             {campos.map(campo => {
-                const isVisivel = avaliarCondicao(campo.condicionais.map(c => `${c.campo} ${c.operador} ${c.valor}`).join(' && '), respostas);
-
+                const isVisivel = avaliarCondicao(campo.condicional, respostas);
                 if (!isVisivel) {
                     return null;
                 }
 
-                const attrsValidacao = { required: campo.obrigatorio };
+                const attrsValidacao = {required: campo.obrigatorio};
+
                 campo.validacoes.forEach(v => {
                     if (v.tipo === 'tamanho_minimo') attrsValidacao.minLength = v.valor;
                     if (v.tipo === 'tamanho_maximo') attrsValidacao.maxLength = v.valor;
@@ -80,16 +92,23 @@ export default function FormularioPreview({ campos }) {
 
                 switch (campo.tipo) {
                     case 'text':
+
+                        const textArea = campo.multilinha
+
+                        const InputComponent = textArea ? 'textarea' : 'input';
+
                         return (
-                            <div key={campo.temp_id}>
-                                <label htmlFor={campo.id} className="block text-sm font-medium text-gray-700">{campo.label}</label>
-                                <input
-                                    type="text"
+                            <div key={campo.temp_id} className={textArea ? 'md:col-span-2' : ''}>
+                                <label htmlFor={campo.id}
+                                       className="block text-sm font-medium text-gray-700">{campo.label}</label>
+                                <InputComponent
+                                    type={textArea ? undefined : 'text'}
                                     id={campo.id}
                                     name={campo.id}
                                     value={respostas[campo.id] || ''}
-                                    onChange={handleRespostaChange}
+                                    onChange={respostaChange}
                                     className="mt-1 p-2 w-full border rounded-md"
+                                    rows={textArea ? 3 : undefined}
                                     {...attrsValidacao}
                                 />
                             </div>
@@ -97,27 +116,29 @@ export default function FormularioPreview({ campos }) {
                     case 'number':
                         return (
                             <div key={campo.temp_id}>
-                                <label htmlFor={campo.id} className="block text-sm font-medium text-gray-700">{campo.label}</label>
+                                <label htmlFor={campo.id}
+                                       className="block text-sm font-medium text-gray-700">{campo.label}</label>
                                 <input
                                     type="number"
                                     id={campo.id}
                                     name={campo.id}
                                     value={respostas[campo.id] || ''}
-                                    onChange={handleRespostaChange}
+                                    onChange={e => respostaChange(e, campo)}
                                     className="mt-1 p-2 w-full border rounded-md"
                                     {...attrsValidacao}
                                 />
                             </div>
                         );
                     case 'select':
-                         return (
+                        return (
                             <div key={campo.temp_id}>
-                                <label htmlFor={campo.id} className="block text-sm font-medium text-gray-700">{campo.label}</label>
+                                <label htmlFor={campo.id}
+                                       className="block text-sm font-medium text-gray-700">{campo.label}</label>
                                 <select
                                     id={campo.id}
                                     name={campo.id}
                                     value={respostas[campo.id] || ''}
-                                    onChange={handleRespostaChange}
+                                    onChange={e => respostaChange(e, campo)}
                                     className="mt-1 p-2 w-full border rounded-md bg-white"
                                     {...attrsValidacao}
                                 >
@@ -127,20 +148,42 @@ export default function FormularioPreview({ campos }) {
                                     ))}
                                 </select>
                             </div>
-                         );
+                        );
                     case 'boolean':
                         return (
                             <div key={campo.temp_id} className="flex items-center">
-                               <input
+                                {/* 1. A label vem primeiro, como você pediu, com uma margem à direita (mr-2) */}
+                                <label htmlFor={campo.id} className="mr-2 block text-sm font-medium text-gray-700">
+                                    {campo.label}
+                                </label>
+
+                                {/* 2. O input vem depois, com as classes de tamanho corrigidas */}
+                                <input
                                     type="checkbox"
                                     id={campo.id}
                                     name={campo.id}
                                     checked={respostas[campo.id] || false}
-                                    onChange={handleRespostaChange}
-                                    className="h-4 w-4 rounded border-gray-300"
+                                    onChange={e => respostaChange(e, campo)}
+                                    // Classes corrigidas para um checkbox (tamanho fixo, sem largura total)
+                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     {...attrsValidacao}
                                 />
-                                <label htmlFor={campo.id} className="ml-2 block text-sm text-gray-700">{campo.label}</label>
+                            </div>
+                        )
+                    case 'date':
+                        return (
+                            <div key={campo.temp_id}>
+                                <label htmlFor={campo.id}
+                                       className="block text-sm font-medium text-gray-700">{campo.label}</label>
+                                <input
+                                    type="date"
+                                    id={campo.id}
+                                    name={campo.id}
+                                    value={respostas[campo.id] || ''}
+                                    onChange={e => respostaChange(e, campo)}
+                                    className="mt-1 p-2 w-full border rounded-md"
+                                    {...attrsValidacao}
+                                />
                             </div>
                         )
                     default:
