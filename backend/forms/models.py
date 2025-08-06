@@ -65,7 +65,6 @@ class Campo(models.Model):
     class Meta:
         unique_together = ('schema', 'campo_id')
 
-
 class Resposta(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     formulario = models.ForeignKey(Formulario, on_delete=models.PROTECT, related_name='respostas')

@@ -5,7 +5,7 @@ export default function Lista() {
     const [formularios, setFormularios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     const [dadosFormulario, setDadosFormulario] = useState(null);
 
     useEffect(() => {
@@ -20,7 +20,7 @@ export default function Lista() {
                 setLoading(false);
             });
     }, []);
-    
+
     const detalhesForms = async (formId) => {
         const idNumerico = parseInt(formId.replace('formulario_', ''), 10);
         try {
@@ -51,7 +51,8 @@ export default function Lista() {
                     Lista de Formulários
                 </h1>
 
-                <button type="button" onClick={clickOpen} className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700  dark:border-gray-700">
+                <button type="button" onClick={clickOpen}
+                        className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700  dark:border-gray-700">
                     Novo Formulário
                 </button>
             </div>
@@ -61,35 +62,42 @@ export default function Lista() {
             ) : (
                 <div className="relative overflow-x-auto rounded-lg ">
                     <table className="w-full text-sm text-left text-gray-300">
+                        <thead className="text-xs uppercase bg-[#334155] text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">Nome</th>
+                                <th scope="col" className="px-6 py-3">Versão</th>
+                                <th scope="col" className="px-6 py-3">Criado em</th>
+                                <th scope="col" className="px-6 py-3">Status</th>
+                                <th scope="col" className="px-6 py-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
                         <tbody className="bg-[#1E293B]">
                         {formularios.map((form) => (
-                                <tr key={form.id} className="border-b border-gray-700 hover:bg-[#334155]">
-                                    <td className="px-6 py-4 font-medium text-white">{form.nome}</td>
-                                    <td className="px-6 py-4">{form.schema_version}</td>
-                                    <td className="px-6 py-4">
-                                        {new Date(form.criado_em).toLocaleDateString()}
-                                    </td>
-                                    <td className={`px-6 py-4 ${form.ativo ? "text-green-400" : "text-red-400"}`}>
-                                        {form.ativo ? "Ativo" : "Inativo"}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        {/* A tag <a> foi trocada por <button> */}
-                                        <button
-                                            onClick={() => detalhesForms(form.id)}
-                                            className="font-medium text-blue-400 hover:underline"
-                                        >
-                                            Ver Detalhes
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                            <tr key={form.id} className="border-b border-gray-700 hover:bg-[#334155]">
+                                <td className="px-6 py-4 font-medium text-white">{form.nome}</td>
+                                <td className="px-6 py-4">{form.schema_version}</td>
+                                <td className="px-6 py-4">
+                                    {new Date(form.criado_em).toLocaleDateString()}
+                                </td>
+                                <td className={`px-6 py-4 ${form.is_ativo ? "text-green-400" : "text-red-400"}`}>
+                                    {form.is_ativo ? "Ativo" : "Inativo"}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <button
+                                        onClick={() => detalhesForms(form.id)}
+                                        className="font-medium text-blue-400 hover:underline"
+                                    >
+                                        Ver Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
                         }
                         </tbody>
                     </table>
                 </div>
             )}
-            {/* O Modal agora recebe os dados do formulário como uma prop */}
-            {isModalOpen && <Modal onClose={clickClose} dadosIniciais={dadosFormulario} />}
+            {isModalOpen && <Modal onClose={clickClose} dadosIniciais={dadosFormulario}/>}
         </div>
     );
 }
