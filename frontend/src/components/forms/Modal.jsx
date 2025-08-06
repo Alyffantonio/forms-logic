@@ -1,4 +1,3 @@
-import React, {useState} from 'react';
 import CheckBox from './campos/CheckBox.jsx';
 import Condicional from "./campos/Condicionais.jsx";
 import Validacao from "./campos/Validacao.jsx";
@@ -7,7 +6,9 @@ import FormularioPreview from './visualizar/FormularioPreview.jsx';
 import Formula from "./Campos/formula/Formula.jsx";
 import Opcoes from "./Campos/opcoes/Opcoes.jsx"
 
-export default function Modal({onClose}) {
+import React, {useState, useEffect} from 'react';
+
+export default function Modal({onClose, dadosIniciais}) {
     const [formState, setFormState] = useState({
         nome: '',
         descricao: '',
@@ -15,6 +16,13 @@ export default function Modal({onClose}) {
     });
 
     const [construtorCondicao, setConstrutorCondicao] = useState({});
+
+    useEffect(() => {
+        if (dadosIniciais) {
+            setFormState(dadosIniciais);
+        }
+
+    }, []);
 
 
     function adicionarCampo() {
@@ -96,8 +104,8 @@ export default function Modal({onClose}) {
     /** ==================== VALIDAÇÕES ==================== **/
     function adicionarValidacao(campoIndex) {
         const camposAtualizados = [...formState.campos];
+        camposAtualizados[campoIndex].validacoes = camposAtualizados[campoIndex].validacoes || [];
         camposAtualizados[campoIndex].validacoes.push({
-            id: Date.now() + Math.random(),
             tipo: "",
         });
         setFormState(prev => ({...prev, campos: camposAtualizados}));
@@ -125,29 +133,20 @@ export default function Modal({onClose}) {
         }));
     }
 
-    function enviarFormulario(event) {
+    async function enviarFormulario(event) {
         event.preventDefault();
-
-        // Cria uma cópia profunda para não alterar o estado original
         const formStateLimpo = JSON.parse(JSON.stringify(formState));
 
-        // Percorre cada campo para fazer a limpeza
         formStateLimpo.campos.forEach(campo => {
-            // 1. Remove o temp_id principal do campo
             delete campo.temp_id;
-
-            // 2. Se houver validações, percorre e remove o id de cada uma
             if (campo.validacoes) {
                 campo.validacoes.forEach(validacao => {
                     delete validacao.id;
                 });
             }
-
-            // 3. Se houver opções, percorre, remove o id e corrige 'valor' para 'value'
             if (campo.opcoes) {
                 campo.opcoes.forEach(opcao => {
                     delete opcao.id;
-                    // Corrige a chave 'valor' para 'value', se necessário
                     if ('valor' in opcao) {
                         opcao.value = opcao.valor;
                         delete opcao.valor;
@@ -156,9 +155,29 @@ export default function Modal({onClose}) {
             }
         });
 
-        console.log("Estado final do formulário (limpo):", JSON.stringify(formStateLimpo, null, 2));
-        // alert('Formulário Salvo!');
-        // onClose();
+        console.log("Enviando para a API:", JSON.stringify(formStateLimpo, null, 2));
+
+        const apiUrl = 'http://127.0.0.1:8000/api/v1/formularios/save/'
+
+        try{
+            const response = await fetch(apiUrl,{
+                method:'POST',
+                headers:{ 'Content-Type':'application/json', },
+                body:JSON.stringify(formStateLimpo)
+            });
+            const result = await response.json();
+
+            if (response.ok){
+                console.log('Formulario criado com sucesso!', result);
+                alert(`Formulário criado! ID: ${result.id}`);
+                onClose();
+            } else {
+                console.error('Erro de validação ou do servidor:', result)
+            }
+        } catch (error){
+            console.error('Falha na conexão com a API:', error)
+            alert('Não foi possível conectar ao servidor.');
+        }
     }
 
     /** ==================== opções ==================== **/
@@ -166,9 +185,8 @@ export default function Modal({onClose}) {
         const camposAtualizados = [...formState.campos];
         camposAtualizados[campoIndex].opcoes = camposAtualizados[campoIndex].opcoes || [];
         camposAtualizados[campoIndex].opcoes.push({
-            id: Date.now() + Math.random(),
             label: "",
-            valor: ""
+            value: ""
         });
         setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
@@ -189,11 +207,9 @@ export default function Modal({onClose}) {
     /** ==================== dependencia ==================== **/
     function adicionarDependencia(campoIndex) {
         const camposAtualizados = [...formState.campos];
-
         if (!camposAtualizados[campoIndex].dependencias) {
             camposAtualizados[campoIndex].dependencias = [];
         }
-
         camposAtualizados[campoIndex].dependencias.push("");
         setFormState(prev => ({...prev, campos: camposAtualizados}));
     }
@@ -214,10 +230,7 @@ export default function Modal({onClose}) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
             <div className="relative bg-white rounded-lg shadow-xl w-[1200px] h-[800px] flex overflow-hidden">
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10"
-                >
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
