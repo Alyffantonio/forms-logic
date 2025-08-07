@@ -1,25 +1,149 @@
-> ### 🎯 Objetivo Geral da História
+> # 📄 Forms Logic - Sistema de Formulários Dinâmicos
 >
-> Desenvolver a funcionalidade principal do sistema **Forms-Logic**, que permite a um usuário criar e gerenciar formulários dinâmicos e inteligentes.  
-> A funcionalidade deve oferecer uma **interface visual** para a construção de formulários com diversos tipos de campos, validações complexas, lógica condicional para exibição de campos e a capacidade de criar campos cujo valor é calculado a partir de outros.  
-> O sistema deve garantir a **integridade dos dados** através de um robusto sistema de validação e **versionamento**, onde cada alteração em um formulário gera uma nova versão, preservando o histórico e a estrutura à qual as respostas estão vinculadas.
+> ## 📌 Descrição Geral
+> O projeto Forms Logic oferece uma plataforma robusta para criação, edição, preenchimento e versionamento automático de formulários dinâmicos.
+> Administradores podem criar formulários com múltiplos tipos de campos, lógicas condicionais, validações personalizadas e fórmulas automáticas entre campos.
+> Cada modificação gera uma nova versão, garantindo rastreabilidade e integridade das respostas.
 >
-> ### 🧩 Título da História: Criação e Versionamento de Formulários Dinâmicos
+> ---
 >
-> **Como um administrador do sistema Forms-Logic**,  
-> **Eu quero** criar e atualizar formulários dinâmicos com múltiplos tipos de campos, validações customizadas e lógica condicional,  
-> **Para que** eu possa coletar dados de forma estruturada e inteligente, adaptando-se a diversas necessidades de negócio e garantindo a integridade das informações coletadas.
+> ## 🎯 Objetivo da História
+> Desenvolver o núcleo do sistema Forms Logic, incluindo:
+> - Criação e edição de formulários inteligentes
+> - Estrutura de versionamento automático
+> - Visualização em tempo real dos campos e regras
+> - Integração completa entre frontend e backend
 >
-> ### ✅ Critérios de Aceitação
+> ---
 >
-> - **Formulário de Criação**: Deve existir uma interface (modal) para a criação de um novo formulário, contendo campos para "Nome" e "Descrição".
-> - **Construtor de Campos**: O usuário deve poder adicionar múltiplos campos ao formulário. Cada campo deve possuir um "ID" (único por formulário), um "Rótulo" (Label) e um "Tipo".
-> - **Tipos de Campos Suportados**: Texto, Número, Data, Seleção (Select), Booleano (Sim/Não) e Calculado.
-> - **Configuração de Validações**: Para cada campo, deve ser possível adicionar regras de validação específicas ao seu tipo (ex: `tamanho_mínimo` e `regex` para texto; `valor_mínimo` e `valor_máximo` para número).
-> - **Lógica Condicional**: Deve ser possível configurar um campo para ser exibido somente se uma ou mais condições baseadas nos valores de outros campos forem atendidas.
-> - **Campos Calculados**: Um campo do tipo "Calculado" deve permitir a definição de uma fórmula que utiliza os valores de outros campos como variáveis. O sistema deve validar e impedir a criação de dependências circulares.
-> - **Preview em Tempo Real**: A interface de criação deve exibir uma pré-visualização do formulário em tempo real, refletindo as configurações de campos, validações e lógicas condicionais à medida que são aplicadas.
-> - **Validação de Estrutura**: Antes de salvar, o backend deve validar a estrutura completa do formulário, incluindo a unicidade dos IDs dos campos, a validade das dependências e a sintaxe das expressões condicionais.
-> - **Confirmação de Ações**: Após criar ou atualizar um formulário com sucesso, o sistema deve exibir uma mensagem de confirmação para o usuário.
-> - **Versionamento Automático**: Ao atualizar um formulário existente, o sistema não deve modificar a versão atual. Em vez disso, deve criar um novo "schema" com um número de versão incrementado, preservando o histórico. A versão anterior é mantida e a nova se torna a ativa.
-> - **Visualização de Respostas**: Os usuários finais devem poder preencher e submeter respostas apenas para a versão ativa de um formulário.
+> ## 🧩 Funcionalidades
+> - Modal para criação de formulários (nome + descrição)
+> - Adição dinâmica de campos com suporte aos tipos:
+>   - Texto, Número, Data, Booleano, Seleção (dropdown), Calculado
+> - Validações por tipo (regex, min/max, obrigatório)
+> - Lógica condicional para exibição de campos
+> - Fórmulas automáticas entre campos (`campo_calculado = campoA + campoB`)
+> - Visualização em tempo real da estrutura do formulário
+> - Versionamento automático preservando versões anteriores
+> - Submissão de respostas sempre vinculadas à versão ativa
+>
+> ---
+>
+> ## ✅ Regras e Critérios de Aceitação
+> - IDs de campos devem ser únicos por formulário
+> - Expressões e dependências validadas no backend
+> - Dependências circulares são proibidas
+> - Atualizações geram nova versão, mantendo as anteriores
+> - Apenas a versão ativa pode receber respostas
+> - Confirmações visuais para cada ação importante do usuário
+>
+> ---
+>
+> ## 🚀 Tecnologias Utilizadas
+>
+> ### 🔙 Backend (`/backend`)
+> - **Python 3.12+**
+> - **Django 4.x** + **Django REST Framework**
+> - **SQLite3** (default, facilmente migrável para PostgreSQL)
+> - Estrutura modular com aplicação de **Strategy Pattern**
+>
+> ### 🎨 Frontend (`/frontend`)
+> - **React 18** com **Vite** para build e hot reload rápido
+> - **Tailwind CSS** com classes utilitárias e responsividade moderna
+> - Estrutura baseada em **componentes reutilizáveis**:
+>   - `CamposFixos.jsx`, `CheckBox.jsx`, `Condicionais.jsx`, `Formula.jsx`
+> - Visualização em tempo real do formulário em: `FormularioPreview.jsx`
+> - Modal dinâmico com `Modal.jsx` e `RespostaModal.jsx`
+> - Organização por páginas: `Home.jsx`, `Lista.jsx`
+> - Validações de entrada e regras de negócio aplicadas dinamicamente nos componentes
+
+>
+> ### 🐳 Infraestrutura
+> - **Docker** (backend + frontend)
+> - **Docker Compose**
+> - **Nginx** (para build estático do frontend)
+>
+> ---
+>
+> ## 🔌 Endpoints Principais da API
+> - `GET /api/v1/formularios/` → Lista todos os formulários
+> - `POST /api/v1/formularios/save/` → Cria/atualiza formulário (nova versão)
+> - `GET /api/v1/formularios/{id}/` → Detalhes de um formulário
+> - `POST /api/v1/respostas/` → Submete resposta para versão ativa
+>
+> ---
+>
+> ## 🏗️ Estrutura do Backend
+>
+> ```
+> backend/
+> ├── manage.py
+> ├── backend/             ← Configurações do projeto Django
+> └── forms/               ← App principal dos formulários
+> ```
+>
+> ### Arquivos-chave do App `forms/`
+> | Arquivo                   | Função principal                                     |
+> |--------------------------|------------------------------------------------------|
+> | `models.py`              | Estrutura dos dados e regras do banco                |
+> | `serializers.py`         | Validações, conversão e lógica dos dados da API      |
+> | `views.py`               | Endpoints e regras de negócios                       |
+> | `urls.py`                | Definições de rotas da API                           |
+> | `filters.py`             | Filtros para listagens dinâmicas                     |
+> | `pagination.py`          | Paginação personalizada para listas                  |
+> | `admin.py`               | Configuração do Django Admin                         |
+> | `tests.py`               | Testes automatizados                                 |
+>
+> ---
+>
+> ## 🧠 Padrão de Projeto: Strategy
+> - Utilizado para isolar a lógica dos tipos de campo, fórmulas e dependências.
+> - Facilita a adição de novos comportamentos sem alterar a estrutura existente.
+> - Implementado de forma distribuída em `serializers.py`, `models.py` e possíveis extensões.
+>
+> ---
+>
+> ## 🛠️ Onde Alterar o Código
+>
+> | Deseja alterar...               | Arquivo / Local                            |
+> |--------------------------------|---------------------------------------------|
+> | Validações de campos           | `forms/serializers.py` ou `forms/models.py` |
+> | Regras e lógica de negócio     | `forms/views.py`                            |
+> | Estrutura de dados do modelo   | `forms/models.py`                           |
+> | Filtros                        | `forms/filters.py`                          |
+> | Paginação                      | `forms/pagination.py`                       |
+> | URLs da API                    | `forms/urls.py`                             |
+> | Visualização no Admin          | `forms/admin.py`                            |
+>
+> ---
+>
+> ## 🧪 Testes
+> - Testes automatizados estão em `forms/tests.py`
+> - Para executar:
+>
+> ```
+> cd backend
+> python manage.py test
+> ```
+>
+> ---
+>
+> ## 🐳 Como Rodar com Docker
+> 1. Clone o repositório:
+>     ```
+>     git clone https://github.com/seu-usuario/forms-logic.git
+>     ```
+> 2. Suba os containers:
+>     ```
+>     docker-compose up --build
+>     ```
+> 3. Acesse:
+>     - Backend: `http://localhost:8000`
+>     - Frontend: `http://localhost:3000`
+>
+> ---
+>
+> ## 📚 Notas Finais
+> > O sistema foi projetado para ser extensível, seguro e fácil de manter.
+> > Novos desenvolvedores devem iniciar entendendo os modelos (`models.py`), os serializers e views.
+> > A lógica condicional e campos calculados são exemplos claros do uso de Strategy Pattern aplicado.
