@@ -3,8 +3,8 @@ import Condicional from "./campos/Condicionais.jsx";
 import Validacao from "./campos/Validacao.jsx";
 import CamposFixos from "./campos/CamposFixos.jsx";
 import FormularioPreview from './visualizar/FormularioPreview.jsx';
-import Formula from "./Campos/formula/Formula.jsx";
-import Opcoes from "./Campos/opcoes/Opcoes.jsx"
+import Formula from "./campos/formula/Formula.jsx";
+import Opcoes from "./campos/opcoes/Opcoes.jsx"
 
 import React, {useState, useEffect} from 'react';
 
