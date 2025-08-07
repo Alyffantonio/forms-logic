@@ -48,7 +48,7 @@ export default function Validacao({campo, index, adicionarValidacao, alterarVali
 
                             </div>
 
-                            {/* Campos extras dinâmicos */}
+                            {/* campos extras dinâmicos */}
                             {regraSelecionada?.campos?.map(campoExtra => (
                                 <input
                                     key={campoExtra}
