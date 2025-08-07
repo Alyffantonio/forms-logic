@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default function RespostaModal({ formParaResponder, onClose }) {
     const [respostas, setRespostas] = useState({});
     const [formularioCompleto, setFormularioCompleto] = useState(null);
@@ -11,7 +13,7 @@ export default function RespostaModal({ formParaResponder, onClose }) {
         const idNumerico = parseInt(formParaResponder.id.replace('formulario_', ''), 10);
         const versao = formParaResponder.schema_version;
 
-        fetch(`http://127.0.0.1:8000/api/v1/formularios/${idNumerico}/versao/${versao}/`)
+        fetch(`${apiUrl}/api/v1/formularios/${idNumerico}/versao/${versao}/`)
             .then(res => res.json())
             .then(data => {
                 setFormularioCompleto(data);
