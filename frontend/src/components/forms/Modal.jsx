@@ -134,51 +134,64 @@ export default function Modal({onClose, dadosIniciais}) {
     }
 
     async function enviarFormulario(event) {
-        event.preventDefault();
-        const formStateLimpo = JSON.parse(JSON.stringify(formState));
+    event.preventDefault();
+    const formStateLimpo = JSON.parse(JSON.stringify(formState));
 
-        formStateLimpo.campos.forEach(campo => {
-            delete campo.temp_id;
-            if (campo.validacoes) {
-                campo.validacoes.forEach(validacao => {
-                    delete validacao.id;
-                });
-            }
-            if (campo.opcoes) {
-                campo.opcoes.forEach(opcao => {
-                    delete opcao.id;
-                    if ('valor' in opcao) {
-                        opcao.value = opcao.valor;
-                        delete opcao.valor;
-                    }
-                });
-            }
-        });
-
-        console.log("Enviando para a API:", JSON.stringify(formStateLimpo, null, 2));
-
-        const apiUrl = 'http://127.0.0.1:8000/api/v1/formularios/save/'
-
-        try{
-            const response = await fetch(apiUrl,{
-                method:'POST',
-                headers:{ 'Content-Type':'application/json', },
-                body:JSON.stringify(formStateLimpo)
+    formStateLimpo.campos.forEach(campo => {
+        delete campo.temp_id;
+        if (campo.validacoes) {
+            campo.validacoes.forEach(validacao => {
+                delete validacao.id;
             });
-            const result = await response.json();
-
-            if (response.ok){
-                console.log('Formulario criado com sucesso!', result);
-                alert(`Formulário criado! ID: ${result.id}`);
-                onClose();
-            } else {
-                console.error('Erro de validação ou do servidor:', result)
-            }
-        } catch (error){
-            console.error('Falha na conexão com a API:', error)
-            alert('Não foi possível conectar ao servidor.');
         }
+        if (campo.opcoes) {
+            campo.opcoes.forEach(opcao => {
+                delete opcao.id;
+                if ('valor' in opcao) {
+                    opcao.value = opcao.valor;
+                    delete opcao.valor;
+                }
+            });
+        }
+    });
+
+    const isEditing = formState.id;
+
+    const idNumerico = isEditing ? parseInt(formState.id.replace('formulario_', ''), 10) : null;
+
+    const apiUrl = isEditing
+        ? `http://127.0.0.1:8000/api/v1/formularios/update/${idNumerico}/`
+        : 'http://127.0.0.1:8000/api/v1/formularios/save/';
+
+    const method = isEditing ? 'PUT' : 'POST';
+
+    console.log(`Enviando para a API (${method}):`, JSON.stringify(formStateLimpo, null, 2));
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formStateLimpo)
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+            const successMessage = isEditing
+                ? `Formulário atualizado com sucesso! Nova versão: ${result.schema_version}`
+                : `Formulário criado! ID: ${result.id}`;
+
+            console.log(successMessage, result);
+            alert(successMessage);
+            onClose();
+        } else {
+            console.error('Erro de validação ou do servidor:', result);
+            alert(`Erro: ${JSON.stringify(result)}`);
+        }
+    } catch (error) {
+        console.error('Falha na conexão com a API:', error);
+        alert('Não foi possível conectar ao servidor.');
     }
+}
 
     /** ==================== opções ==================== **/
     function adicionarOpcao(campoIndex) {

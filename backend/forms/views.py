@@ -6,14 +6,14 @@ from django.utils import timezone
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import FormularioSchemas, Campo, Formulario
-from .serializers import FormularioSerializer, FormularioDetailSerializer, FormularioListSerializer, FormularioUpdateSerializer
+from .serializers import FormularioCreateSerializer, FormularioDetailSerializer, FormularioListSerializer, FormularioUpdateSerializer, RespostaSerializer
 from .filters import FormularioFilter
 from .pagination import FormularioPagination
 
 class FormularioCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
-        serializer = FormularioSerializer(data=request.data)
+        serializer = FormularioCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
@@ -51,34 +51,33 @@ class FormularioCreateView(APIView):
         return Response(resposta_sucesso, status=status.HTTP_201_CREATED)
 
 class FormularioListView(generics.ListAPIView):
-    queryset = Formulario.objects.filter(data_remocao__isnull=True)
+    queryset = FormularioSchemas.objects.filter(formulario__data_remocao__isnull=True).select_related('formulario')
+
     serializer_class = FormularioListSerializer
     pagination_class = FormularioPagination
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FormularioFilter
-    ordering_fields = ['nome', 'data_criacao']
-    ordering = ['-data_criacao']
 
-    def get_ordering(self):
-        ordenar_por = self.request.query_params.get('ordenar_por', None)
-        ordem = self.request.query_params.get('ordem', 'asc')
-
-        if ordenar_por in ['nome', 'data_criacao']:
-            return [ordenar_por if ordem == 'asc' else f'-{ordenar_por}']
-
-        return super().get_ordering()
+    ordering_fields = ['formulario__nome', 'data_criacao']
+    ordering = ['-formulario__nome', '-schema_version']
 
 class FormularioDetailView(generics.RetrieveAPIView):
-
-    queryset = Formulario.objects.filter(formularioschemas__is_ativo=True).distinct()
+    queryset = Formulario.objects.filter(data_remocao__isnull=True).distinct()
     serializer_class = FormularioDetailSerializer
-
     lookup_field = 'id'
+
+
+    def get_serializer_context(self):
+
+        context = super().get_serializer_context()
+        if 'version' in self.kwargs:
+            context['version'] = self.kwargs['version']
+        return context
 
 class FormularioUpdateView(generics.UpdateAPIView):
     queryset = Formulario.objects.all()
     serializer_class = FormularioUpdateSerializer
-    lookup_field = "pk"
+    lookup_field = "id"
 
     def update(self, request, *args, **kwargs):
         formulario = self.get_object()
@@ -124,10 +123,63 @@ class FormularioUpdateView(generics.UpdateAPIView):
 
 class FormularioDeleteView(generics.DestroyAPIView):
     queryset = Formulario.objects.all()
+    lookup_field = 'id'
 
     def delete(self, request, *args, **kwargs):
         formulario = self.get_object()
-        formulario.data_remocao = timezone.now()
-        formulario.usuario_remocao = request.user.username if request.user.is_authenticated else "sistema"
-        formulario.save(update_fields=["data_remocao", "usuario_remocao"])
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if formulario.data_remocao:
+            return Response({
+                "mensagem": f"Formulário '{formulario.string_id}' já estava removido. Nenhuma ação foi realizada.",
+                "status": "soft_deleted"
+            }, status=status.HTTP_200_OK)
+
+        if FormularioSchemas.objects.filter(formulario=formulario, protegido=True).exists():
+            return Response({
+                "erro": "formulario_protegido",
+                "mensagem": "Este formulário é protegido e não pode ser removido manualmente."
+            }, status=status.HTTP_409_CONFLICT)
+
+        try:
+            with transaction.atomic():
+                FormularioSchemas.objects.filter(formulario=formulario).update(is_ativo=False)
+
+                formulario.data_remocao = timezone.now()
+                formulario.usuario_remocao = request.user.username if request.user.is_authenticated else "sistema"
+                formulario.save(update_fields=["data_remocao", "usuario_remocao"])
+
+        except Exception as e:
+            return Response({
+                "erro": "falha_remocao_logica",
+                "mensagem": f"Erro interno ao marcar o formulário como removido: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({
+            "mensagem": f"Formulário '{formulario.string_id}' marcado como removido com sucesso. Nenhuma resposta foi excluída.",
+            "status": "soft_deleted"
+        }, status=status.HTTP_200_OK)
+
+
+class RespostaCreateView(generics.CreateAPIView):
+    serializer_class = RespostaSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        formulario_id = self.kwargs.get('id')
+        context['formulario'] = generics.get_object_or_404(Formulario, id=formulario_id)
+        return context
+
+    def perform_create(self, serializer):
+        resposta = serializer.save()
+
+        self.created_instance = resposta
+
+    def create(self, request, *args, **kwargs):
+        super().create(request, *args, **kwargs)
+
+        return Response({
+            "mensagem": "Resposta registrada com sucesso.",
+            "id_resposta": self.created_instance.id,
+            "calculados": self.created_instance.calculados,
+            "executado_em": self.created_instance.criado_em.isoformat(),
+        }, status=status.HTTP_201_CREATED)
