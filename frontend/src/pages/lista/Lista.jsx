@@ -3,6 +3,8 @@ import Modal from "../../components/forms/Modal.jsx";
 import RespostaModal from "../../components/forms/respostas/RespostaModal.jsx";
 import {FaEdit, FaTrash, FaWpforms} from "react-icons/fa";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default function Lista() {
     const [formularios, setFormularios] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ export default function Lista() {
         if (filtros.data_fim) params.append('data_fim', filtros.data_fim);
 
 
-        fetch(`http://127.0.0.1:8000/api/v1/formularios/?${params.toString()}`)
+        fetch(`${apiUrl}/api/v1/formularios/?${params.toString()}`)
             .then((res) => res.json())
             .then((data) => {
                 setFormularios(data.results || []);
@@ -64,7 +66,8 @@ export default function Lista() {
         const versao = form.schema_version;
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/v1/formularios/${idNumerico}/versao/${versao}/`);
+            // CORRIGIDO: Removido o excesso na URL
+            const response = await fetch(`${apiUrl}/api/v1/formularios/${idNumerico}/versao/${versao}/`);
             const data = await response.json();
             setDadosFormulario(data);
             setIsModalOpen(true);
@@ -81,7 +84,8 @@ export default function Lista() {
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/v1/formularios/delete/${idNumerico}/`, {
+            // CORRIGIDO: Removido o excesso na URL
+            const response = await fetch(`${apiUrl}/api/v1/formularios/delete/${idNumerico}/`, {
                 method: 'DELETE',
             });
             if (response.ok) {

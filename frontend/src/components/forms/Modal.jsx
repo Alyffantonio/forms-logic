@@ -8,6 +8,8 @@ import Opcoes from "./campos/opcoes/Opcoes.jsx"
 
 import React, {useState, useEffect} from 'react';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default function Modal({onClose, dadosIniciais}) {
     const [formState, setFormState] = useState({
         nome: '',
@@ -159,16 +161,16 @@ export default function Modal({onClose, dadosIniciais}) {
 
     const idNumerico = isEditing ? parseInt(formState.id.replace('formulario_', ''), 10) : null;
 
-    const apiUrl = isEditing
-        ? `http://127.0.0.1:8000/api/v1/formularios/update/${idNumerico}/`
-        : 'http://127.0.0.1:8000/api/v1/formularios/save/';
+    const endpoint = isEditing
+        ? `${apiUrl}/api/v1/formularios/update/${idNumerico}/`
+        : `${apiUrl}/api/v1/formularios/save/`;
 
     const method = isEditing ? 'PUT' : 'POST';
 
     console.log(`Enviando para a API (${method}):`, JSON.stringify(formStateLimpo, null, 2));
 
     try {
-        const response = await fetch(apiUrl, {
+        const response = await fetch(endpoint, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formStateLimpo)
