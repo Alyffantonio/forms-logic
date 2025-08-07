@@ -1,16 +1,24 @@
 from django.db import models
 import uuid
+from django.contrib.auth import get_user_model
 
+
+User = get_user_model()
 
 class Formulario(models.Model):
     nome = models.CharField(max_length=255)
     descricao = models.TextField(max_length=500, blank=True, null=True)
-
-
-    # Controle de auditoria e remoção lógica
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_remocao = models.DateTimeField(null=True, blank=True)
     usuario_remocao = models.CharField(max_length=150, null=True, blank=True)
+
+    criador = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='formularios_criados'
+    )
 
     @property
     def string_id(self):
@@ -30,6 +38,14 @@ class FormularioSchemas(models.Model):
     schema_version = models.IntegerField(default=1)
     is_ativo = models.BooleanField(default=True)
     protegido = models.BooleanField(default=False)
+
+    criador = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='schemas_criados'
+    )
 
     # Controle de auditoria e remoção lógica
     data_criacao = models.DateTimeField(auto_now_add=True)
@@ -69,6 +85,14 @@ class Resposta(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     formulario = models.ForeignKey(Formulario, on_delete=models.PROTECT, related_name='respostas')
     schema = models.ForeignKey(FormularioSchemas, on_delete=models.PROTECT)
+
+    criador = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='respostas_enviadas'
+    )
 
     respostas = models.JSONField()
     calculados = models.JSONField(null=True, blank=True)
