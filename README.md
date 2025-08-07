@@ -66,10 +66,12 @@
 > ---
 >
 > ## 🔌 Endpoints Principais da API
-> - `GET /api/v1/formularios/` → Lista todos os formulários
-> - `POST /api/v1/formularios/save/` → Cria/atualiza formulário (nova versão)
-> - `GET /api/v1/formularios/{id}/` → Detalhes de um formulário
-> - `POST /api/v1/respostas/` → Submete resposta para versão ativa
+> - `GET /formularios/` → Lista todos os formulários
+> - `POST /formularios/save/` → Cria um novo formulário
+> - `GET /formularios/<id>/versao/<version>/` → Retorna os detalhes da versão de um formulário
+> - `PUT /formularios/update/<id>/` → Atualiza um formulário existente (nova versão)
+> - `DELETE /formularios/delete/<id>/` → Marca um formulário como inativo (soft delete)
+> - `POST /formularios/<id>/respostas/` → Submete uma resposta para o formulário identificado
 >
 > ---
 >
