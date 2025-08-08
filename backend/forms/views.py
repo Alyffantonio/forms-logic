@@ -9,10 +9,12 @@ from .models import FormularioSchemas, Campo, Formulario
 from .serializers import FormularioCreateSerializer, FormularioDetailSerializer, FormularioListSerializer, FormularioUpdateSerializer, RespostaSerializer
 from .filters import FormularioFilter
 from .pagination import FormularioPagination
+from rest_framework.permissions import AllowAny
 
 class FormularioCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
+        print("👤 Usuário autenticado:", request.user)
         serializer = FormularioCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -22,7 +24,8 @@ class FormularioCreateView(APIView):
             schema = FormularioSchemas.objects.create(
                 formulario=formulario,
                 schema_version=1,
-                is_ativo=True
+                is_ativo=True,
+                criador=self.request.user
             )
 
             campos = request.data.get("campos", [])
@@ -57,6 +60,7 @@ class FormularioListView(generics.ListAPIView):
     pagination_class = FormularioPagination
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FormularioFilter
+    permission_classes = [AllowAny]
 
     ordering_fields = ['formulario__nome', 'data_criacao']
     ordering = ['-formulario__nome', '-schema_version']
@@ -65,6 +69,7 @@ class FormularioDetailView(generics.RetrieveAPIView):
     queryset = Formulario.objects.filter(data_remocao__isnull=True).distinct()
     serializer_class = FormularioDetailSerializer
     lookup_field = 'id'
+    permission_classes = [AllowAny]
 
 
     def get_serializer_context(self):
@@ -85,13 +90,17 @@ class FormularioUpdateView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
+
+            FormularioSchemas.objects.filter(formulario=formulario).update(is_ativo=False)
+
             ultima_versao = FormularioSchemas.objects.filter(formulario=formulario).order_by('-schema_version').first()
             nova_versao = (ultima_versao.schema_version + 1) if ultima_versao else 1
 
             schema = FormularioSchemas.objects.create(
                 formulario=formulario,
                 schema_version=nova_versao,
-                is_ativo=True
+                is_ativo=True,
+                criador=self.request.user
             )
 
             campos = serializer.validated_data["campos"]

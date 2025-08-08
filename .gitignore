@@ -1,8 +1,10 @@
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 
+dist/
+
+.env
 venv/
 env/
-*.env
+
+.idea/

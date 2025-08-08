@@ -69,7 +69,6 @@ export default function Lista() {
             const versao = form.schema_version;
 
             try {
-                // CORRIGIDO: Removido o excesso na URL
                 const response = await fetch(`${apiUrl}/api/v1/formularios/${idNumerico}/versao/${versao}/`);
                 const data = await response.json();
                 setDadosFormulario(data);
@@ -166,6 +165,7 @@ export default function Lista() {
         setFormParaResponder(null);
         setIsRespostaModalOpen(false);
     };
+
     return (
         <div className="p-6 bg-white rounded-lg w-full h-full flex flex-col">
             <div className="flex items-center justify-between px-1 mb-4">

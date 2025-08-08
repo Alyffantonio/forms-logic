@@ -21,7 +21,6 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<Navigate to="/formularios" />} />
                     <Route path="/formularios" element={<Forms />} />
-                    {/* A rota duplicada foi removida daqui */}
                 </Routes>
             </Dashboard>
 

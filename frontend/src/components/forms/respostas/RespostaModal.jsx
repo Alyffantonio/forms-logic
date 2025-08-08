@@ -32,13 +32,10 @@ export default function RespostaModal({ formParaResponder, onClose }) {
         const token = localStorage.getItem('authToken');
         const idNumerico = parseInt(formParaResponder.id.replace('formulario_', ''), 10);
         const endPoint = `${apiUrl}/api/v1/formularios/${idNumerico}/respostas/`;
-
-        const payload = {
-            respostas: respostas,
-        };
+        
 
         try {
-            const response = await fetch(endPoint, { // Corrigido
+            const response = await fetch(endPoint, { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

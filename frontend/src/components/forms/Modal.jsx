@@ -138,6 +138,8 @@ export default function Modal({onClose, dadosIniciais}) {
     /** ==================== submit ==================== **/
     async function enviarFormulario(event) {
     event.preventDefault();
+    const token = localStorage.getItem('authToken');
+    console.log('token',token)
     const formStateLimpo = JSON.parse(JSON.stringify(formState));
 
     formStateLimpo.campos.forEach(campo => {
@@ -172,7 +174,10 @@ export default function Modal({onClose, dadosIniciais}) {
     try {
         const response = await fetch(endpoint, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
             body: JSON.stringify(formStateLimpo)
         });
         const result = await response.json();

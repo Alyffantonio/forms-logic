@@ -6,11 +6,11 @@ from .serializers import RegisterSerializer, UserSerializer
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.permissions import AllowAny
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-
+    permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
 
         serializer = self.get_serializer(data=request.data)
@@ -25,24 +25,20 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginView(generics.GenericAPIView):
-
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
-        print("caiu aqui")
         username = request.data.get("username")
         password = request.data.get("password")
 
-        # Autentica o usuário com as credenciais fornecidas
         user = authenticate(username=username, password=password)
 
         if user:
-            # Se o usuário for válido, retorna os dados e o token
             token, created = Token.objects.get_or_create(user=user)
             return Response({
                 "user": UserSerializer(user).data,
                 "token": token.key
             })
 
-        # Se as credenciais forem inválidas, retorna um erro
         return Response({"detail": "Credenciais inválidas."}, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
