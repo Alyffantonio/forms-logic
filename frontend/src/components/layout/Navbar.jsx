@@ -1,9 +1,8 @@
 import minhaFoto from "../../assets/baixados.png";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { useAuth } from '../../context/AuthContext'; // 1. Importe o useAuth
+import { useAuth } from '../../context/AuthContext';
 
 export default function Header() {
-    // 2. Obtenha o estado de login e a função de logout do contexto
     const { isLoggedIn, user, logout } = useAuth();
 
     const handleGithubClick = () => {

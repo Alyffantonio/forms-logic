@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify'; // Importe o toast
+import { toast } from 'react-toastify';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -32,10 +32,13 @@ export default function RespostaModal({ formParaResponder, onClose }) {
         const token = localStorage.getItem('authToken');
         const idNumerico = parseInt(formParaResponder.id.replace('formulario_', ''), 10);
         const endPoint = `${apiUrl}/api/v1/formularios/${idNumerico}/respostas/`;
-        
+
+        const payload = {
+            respostas: respostas
+        };
 
         try {
-            const response = await fetch(endPoint, { 
+            const response = await fetch(endPoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -72,7 +75,6 @@ export default function RespostaModal({ formParaResponder, onClose }) {
                     {loading ? (
                         <p>Carregando campos...</p>
                     ) : (
-
                         formularioCompleto?.campos.map(campo => {
                             return (
                                 <div key={campo.id}>

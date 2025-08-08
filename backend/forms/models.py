@@ -22,7 +22,6 @@ class Formulario(models.Model):
 
     @property
     def string_id(self):
-        """Retorna o identificador amigável do formulário (ex: formulario_001)."""
         return f"formulario_{self.id:03}"
 
     def __str__(self):
@@ -47,13 +46,11 @@ class FormularioSchemas(models.Model):
         related_name='schemas_criados'
     )
 
-    # Controle de auditoria e remoção lógica
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_remocao = models.DateTimeField(null=True, blank=True)
     usuario_remocao = models.CharField(max_length=150, null=True, blank=True)
 
 class Campo(models.Model):
-    """Representa campos de uma versão de formulário (opcional caso não queira só JSON)."""
     TIPO_DE_CAMPO_CHOICES = [
         ('text', 'Texto'),
         ('number', 'Número'),
