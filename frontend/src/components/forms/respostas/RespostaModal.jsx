@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -29,44 +30,36 @@ export default function RespostaModal({ formParaResponder, onClose }) {
         event.preventDefault();
 
         const token = localStorage.getItem('authToken');
-
-        const apiUrl = import.meta.env.VITE_API_URL;
-
         const idNumerico = parseInt(formParaResponder.id.replace('formulario_', ''), 10);
         const endPoint = `${apiUrl}/api/v1/formularios/${idNumerico}/respostas/`;
 
         const payload = {
-            respostas: respostas,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Token ${token}`
-            },
+            respostas: respostas
         };
 
         try {
-            const response = await fetch(apiUrl, {
+            const response = await fetch(endPoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
                 body: JSON.stringify(payload)
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                alert(`Resposta enviada com sucesso! ID da Resposta: ${result.id_resposta}`);
+                toast.success(`Resposta enviada com sucesso! ID: ${result.id_resposta}`);
                 onClose();
             } else {
                 console.error('Erro de validação:', result);
-                alert(`Erro ao enviar resposta: ${JSON.stringify(result)}`);
+                toast.error(`Erro ao enviar resposta: ${JSON.stringify(result)}`);
             }
         } catch (error) {
             console.error('Falha na conexão:', error);
-            alert('Não foi possível conectar ao servidor.');
+            toast.error('Não foi possível conectar ao servidor.');
         }
-    };
-
-    const handleRespostaChange = (novasRespostas) => {
-        setRespostas(novasRespostas);
     };
 
     return (
@@ -82,7 +75,6 @@ export default function RespostaModal({ formParaResponder, onClose }) {
                     {loading ? (
                         <p>Carregando campos...</p>
                     ) : (
-
                         formularioCompleto?.campos.map(campo => {
                             return (
                                 <div key={campo.id}>

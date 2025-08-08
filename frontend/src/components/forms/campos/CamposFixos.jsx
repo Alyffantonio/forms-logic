@@ -1,7 +1,4 @@
 import React from "react";
-import Formula from "./formula/Formula.jsx";
-import Opcoes from "./opcoes/Opcoes.jsx"
-import CheckBox from "./CheckBox.jsx";
 
 export default function CamposFixos({campo, index, alterarCampo}) {
     return (

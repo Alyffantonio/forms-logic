@@ -3,6 +3,7 @@ import Modal from "../../components/forms/Modal.jsx";
 import RespostaModal from "../../components/forms/respostas/RespostaModal.jsx";
 import {FaEdit, FaTrash, FaWpforms} from "react-icons/fa";
 import {useAuth} from "../../context/AuthContext.jsx";
+import {toast} from "react-toastify";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -86,9 +87,8 @@ export default function Lista() {
                 return;
             }
             const token = localStorage.getItem('authToken');
-            console.log('token', token)
-            try {
 
+            try {
                 const response = await fetch(`${apiUrl}/api/v1/formularios/delete/${idNumerico}/`, {
                     method: 'DELETE',
                     headers: {
@@ -97,16 +97,17 @@ export default function Lista() {
                     },
                 });
                 if (response.ok) {
-                    alert("Formulário deletado com sucesso!");
+                    toast.success("Formulário deletado com sucesso!");
                     setFormularios(formularios.filter(form => form.id !== formId));
                 } else {
                     console.error("Falha ao deletar o formulário. Status:", response.status);
-                    alert("Não foi possível deletar o formulário.");
+                    toast.error("Não foi possível deletar o formulário.");
                 }
             } catch (error) {
-                console.error("Erro ao desativar formulário:", error)
+                console.error("Erro ao desativar formulário:", error);
+                toast.error("Ocorreu um erro de conexão ao tentar deletar.");
             }
-        })
+        });
     };
 
     const clickOpen = () => {
