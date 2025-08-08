@@ -8,9 +8,8 @@ class FormularioFilter(django_filters.FilterSet):
 
     schema_version = django_filters.NumberFilter(field_name='schema_version')
 
-    data_inicio = django_filters.DateFilter(field_name='data_criacao', lookup_expr='gte')
-    data_fim = django_filters.DateFilter(field_name='data_criacao', lookup_expr='lte')
+    data_criacao = django_filters.DateFilter(field_name='data_criacao', lookup_expr='date')
 
     class Meta:
         model = FormularioSchemas
-        fields = ['nome', 'schema_version']
+        fields = ['nome', 'schema_version', 'data_criacao']
