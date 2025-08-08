@@ -27,22 +27,18 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
-        print("caiu aqui")
         username = request.data.get("username")
         password = request.data.get("password")
 
-        # Autentica o usuário com as credenciais fornecidas
         user = authenticate(username=username, password=password)
 
         if user:
-            # Se o usuário for válido, retorna os dados e o token
             token, created = Token.objects.get_or_create(user=user)
             return Response({
                 "user": UserSerializer(user).data,
                 "token": token.key
             })
 
-        # Se as credenciais forem inválidas, retorna um erro
         return Response({"detail": "Credenciais inválidas."}, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):

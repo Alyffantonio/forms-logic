@@ -1,5 +1,3 @@
-// frontend/src/App.jsx
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/home/Home.jsx";
 import Forms from "./pages/lista/Lista.jsx";
@@ -23,11 +21,9 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<Navigate to="/formularios" />} />
                     <Route path="/formularios" element={<Forms />} />
-                    {/* A rota duplicada foi removida daqui */}
                 </Routes>
             </Dashboard>
 
-            {/* A lógica para mostrar os modais já está aqui e está correta */}
             {showLoginModal && (
                 <LoginModal
                     onClose={() => setShowLoginModal(false)}
