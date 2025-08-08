@@ -5,8 +5,8 @@ import CamposFixos from "./campos/CamposFixos.jsx";
 import FormularioPreview from './visualizar/FormularioPreview.jsx';
 import Formula from "./campos/formula/Formula.jsx";
 import Opcoes from "./campos/opcoes/Opcoes.jsx"
-
 import React, {useState, useEffect} from 'react';
+import {toast} from "react-toastify";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -135,6 +135,7 @@ export default function Modal({onClose, dadosIniciais}) {
         }));
     }
 
+    /** ==================== submit ==================== **/
     async function enviarFormulario(event) {
     event.preventDefault();
     const formStateLimpo = JSON.parse(JSON.stringify(formState));
@@ -167,7 +168,6 @@ export default function Modal({onClose, dadosIniciais}) {
 
     const method = isEditing ? 'PUT' : 'POST';
 
-    console.log(`Enviando para a API (${method}):`, JSON.stringify(formStateLimpo, null, 2));
 
     try {
         const response = await fetch(endpoint, {
@@ -182,16 +182,13 @@ export default function Modal({onClose, dadosIniciais}) {
                 ? `Formulário atualizado com sucesso! Nova versão: ${result.schema_version}`
                 : `Formulário criado! ID: ${result.id}`;
 
-            console.log(successMessage, result);
-            alert(successMessage);
+            toast.success(successMessage);
             onClose();
         } else {
-            console.error('Erro de validação ou do servidor:', result);
-            alert(`Erro: ${JSON.stringify(result)}`);
+            toast.error(`Erro: ${JSON.stringify(result)}`);
         }
     } catch (error) {
-        console.error('Falha na conexão com a API:', error);
-        alert('Não foi possível conectar ao servidor.');
+        toast.error('Não foi possível conectar ao servidor.')
     }
 }
 
