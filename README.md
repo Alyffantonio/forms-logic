@@ -144,6 +144,120 @@
 >     - Frontend: `http://localhost:3000`
 >
 > ---
+>## 🔐 Fluxo de Autenticação da API
+>
+>O sistema utiliza autenticação por token (TokenAuthentication), permitindo que o usuário se registre, faça login e depois utilize o token nas requisições protegidas.
+>
+>---
+>
+>### 🔁 Fluxo Geral
+>
+>1. **Registro de novo usuário**
+>2. **Login com usuário registrado**
+>3. **Recebimento do token de autenticação**
+>4. **Uso do token em todas as requisições protegidas**
+>
+>---
+>
+>### 📥 1. Registro de Usuário
+>
+>- **Endpoint:** `/api/v1/auth/register/`
+>- **Método:** `POST`
+>- **Corpo (JSON):**
+>  ```json
+>  {
+>    "username": "novo_usuario",
+>    "password": "senha_segura",
+>    "password2": "senha_segura"
+>  }
+>````
+>
+>* **Resposta esperada (201 Created):**
+>
+>  ```json
+>  {
+>    "message": "Usuário criado com sucesso.",
+>    "user": {
+>      "id": 3,
+>      "username": "novo_usuario"
+>    }
+>  }
+>  ```
+>
+>---
+>
+>### 🔐 2. Login
+>
+>* **Endpoint:** `/api/v1/auth/login/`
+>
+>* **Método:** `POST`
+>
+>* **Corpo (JSON):**
+>
+>  ```json
+>  {
+>    "username": "novo_usuario",
+>    "password": "senha_segura"
+>  }
+>  ```
+>
+>* **Resposta esperada:**
+>
+>  ```json
+>  {
+>    "user": {
+>      "id": 3,
+>      "username": "novo_usuario"
+>    },
+>    "token": "34a91ab80fa814b01a56bf6818ccc5c8ab8d820e"
+>  }
+>  ```
+>
+>---
+>
+>### 📤 3. Usando o Token nas Requisições
+>
+>Após obter o token, ele deve ser adicionado no cabeçalho (**Header**) de **todas as requisições autenticadas**, como criar, listar, editar e deletar formulários.
+>
+>#### 🧾 Header obrigatório:
+>
+>| Chave         | Valor                                          |
+>| ------------- | ---------------------------------------------- |
+>| Authorization | Token 34a91ab80fa814b01a56bf6818ccc5c8ab8d820e |
+>
+> ⚠️ Atenção: Deve conter a palavra `Token`, seguida de espaço e o valor do token.
+>
+>---
+>
+>### 📌 Exemplo de Requisição Autenticada
+>
+>```http
+>POST /api/v1/formularios/save/ HTTP/1.1
+>Host: localhost:8000
+>Authorization: Token 34a91ab80fa814b01a56bf6818ccc5c8ab8d820e
+>Content-Type: application/json
+>
+>{
+>  "nome": "Formulário Teste",
+>  "descricao": "Criado via API com token"
+>}
+>```
+>
+>---
+>
+>### 🛡️ Segurança
+>
+>* O token identifica o usuário autenticado em todas as ações.
+>* Se o token estiver ausente ou inválido, o sistema retorna `401 Unauthorized`.
+>* O usuário autenticado será acessível no backend via `request.user`.
+>
+>---
+>
+>### ✅ Dica
+>
+>Use ferramentas como **Insomnia** ou **Postman** para testar os endpoints, adicionando o token na aba **"Headers"** ou **"Auth"** conforme explicado acima.
+>
+>---
 >
 > ## 📚 Notas Finais
 > > O sistema foi projetado para ser extensível, seguro e fácil de manter.
