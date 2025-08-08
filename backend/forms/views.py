@@ -13,6 +13,7 @@ from .pagination import FormularioPagination
 class FormularioCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
+        print("👤 Usuário autenticado:", request.user)
         serializer = FormularioCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -22,7 +23,8 @@ class FormularioCreateView(APIView):
             schema = FormularioSchemas.objects.create(
                 formulario=formulario,
                 schema_version=1,
-                is_ativo=True
+                is_ativo=True,
+                criador=self.request.user
             )
 
             campos = request.data.get("campos", [])
@@ -85,13 +87,17 @@ class FormularioUpdateView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
+
+            FormularioSchemas.objects.filter(formulario=formulario).update(is_ativo=False)
+
             ultima_versao = FormularioSchemas.objects.filter(formulario=formulario).order_by('-schema_version').first()
             nova_versao = (ultima_versao.schema_version + 1) if ultima_versao else 1
 
             schema = FormularioSchemas.objects.create(
                 formulario=formulario,
                 schema_version=nova_versao,
-                is_ativo=True
+                is_ativo=True,
+                criador=self.request.user
             )
 
             campos = serializer.validated_data["campos"]

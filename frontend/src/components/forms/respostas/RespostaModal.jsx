@@ -27,13 +27,20 @@ export default function RespostaModal({ formParaResponder, onClose }) {
 
     const sendRespostas = async (event) => {
         event.preventDefault();
+
+        const token = localStorage.getItem('authToken');
+
         const apiUrl = import.meta.env.VITE_API_URL;
 
         const idNumerico = parseInt(formParaResponder.id.replace('formulario_', ''), 10);
         const endPoint = `${apiUrl}/api/v1/formularios/${idNumerico}/respostas/`;
 
         const payload = {
-            respostas: respostas
+            respostas: respostas,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
         };
 
         try {
