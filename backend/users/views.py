@@ -6,11 +6,11 @@ from .serializers import RegisterSerializer, UserSerializer
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.permissions import AllowAny
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-
+    permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
 
         serializer = self.get_serializer(data=request.data)
@@ -25,7 +25,7 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginView(generics.GenericAPIView):
-
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         username = request.data.get("username")
         password = request.data.get("password")
