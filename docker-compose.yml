@@ -8,6 +8,8 @@ services:
       - ./backend:/app
     ports:
       - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
     networks:
       - forms-net
 

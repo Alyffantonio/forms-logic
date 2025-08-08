@@ -27,9 +27,10 @@ export default function RespostaModal({ formParaResponder, onClose }) {
 
     const sendRespostas = async (event) => {
         event.preventDefault();
+        const apiUrl = import.meta.env.VITE_API_URL;
 
         const idNumerico = parseInt(formParaResponder.id.replace('formulario_', ''), 10);
-        const apiUrl = `http://127.0.0.1:8000/api/v1/formularios/${idNumerico}/respostas/`;
+        const endPoint = `${apiUrl}/api/v1/formularios/${idNumerico}/respostas/`;
 
         const payload = {
             respostas: respostas

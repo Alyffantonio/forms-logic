@@ -2,10 +2,13 @@ import {useEffect, useState} from "react";
 import Modal from "../../components/forms/Modal.jsx";
 import RespostaModal from "../../components/forms/respostas/RespostaModal.jsx";
 import {FaEdit, FaTrash, FaWpforms} from "react-icons/fa";
+import {useAuth} from "../../context/AuthContext.jsx";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function Lista() {
+    const {requireAuth} = useAuth();
+
     const [formularios, setFormularios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,8 +21,7 @@ export default function Lista() {
     const [filtros, setFiltros] = useState({
         nome: '',
         schema_version: '',
-        data_inicio: '',
-        data_fim: ''
+        data_criacao: '',
     });
     const [ordenacao, setOrdenacao] = useState({
         ordenar_por: 'data_criacao',
@@ -38,8 +40,7 @@ export default function Lista() {
 
         if (filtros.nome) params.append('nome', filtros.nome);
         if (filtros.schema_version) params.append('schema_version', filtros.schema_version);
-        if (filtros.data_inicio) params.append('data_inicio', filtros.data_inicio);
-        if (filtros.data_fim) params.append('data_fim', filtros.data_fim);
+        if (filtros.data_criacao) params.append('data_criacao', filtros.data_criacao);
 
 
         fetch(`${apiUrl}/api/v1/formularios/?${params.toString()}`)
@@ -62,47 +63,53 @@ export default function Lista() {
 
 
     const detalhesForms = async (form) => {
-        const idNumerico = parseInt(form.id.replace('formulario_', ''), 10);
-        const versao = form.schema_version;
+        requireAuth(async () => {
+            const idNumerico = parseInt(form.id.replace('formulario_', ''), 10);
+            const versao = form.schema_version;
 
-        try {
-            // CORRIGIDO: Removido o excesso na URL
-            const response = await fetch(`${apiUrl}/api/v1/formularios/${idNumerico}/versao/${versao}/`);
-            const data = await response.json();
-            setDadosFormulario(data);
-            setIsModalOpen(true);
-        } catch (error) {
-            console.error("Erro ao buscar detalhes do formulário:", error);
-        }
+            try {
+                // CORRIGIDO: Removido o excesso na URL
+                const response = await fetch(`${apiUrl}/api/v1/formularios/${idNumerico}/versao/${versao}/`);
+                const data = await response.json();
+                setDadosFormulario(data);
+                setIsModalOpen(true);
+            } catch (error) {
+                console.error("Erro ao buscar detalhes do formulário:", error);
+            }
+        })
     };
 
     const deletarForm = async (formId) => {
-        const idNumerico = parseInt(formId.replace('formulario_', ''), 10);
+        requireAuth(async () => {
+            const idNumerico = parseInt(formId.replace('formulario_', ''), 10);
 
-        if (!confirm(`Tem certeza que deseja deletar o formulário "${formId}"?`)) {
-            return;
-        }
-
-        try {
-            // CORRIGIDO: Removido o excesso na URL
-            const response = await fetch(`${apiUrl}/api/v1/formularios/delete/${idNumerico}/`, {
-                method: 'DELETE',
-            });
-            if (response.ok) {
-                alert("Formulário deletado com sucesso!");
-                setFormularios(formularios.filter(form => form.id !== formId));
-            } else {
-                console.error("Falha ao deletar o formulário. Status:", response.status);
-                alert("Não foi possível deletar o formulário.");
+            if (!confirm(`Tem certeza que deseja deletar o formulário "${formId}"?`)) {
+                return;
             }
-        } catch (error) {
-            console.error("Erro ao desativar formulário:", error)
-        }
+
+            try {
+                // CORRIGIDO: Removido o excesso na URL
+                const response = await fetch(`${apiUrl}/api/v1/formularios/delete/${idNumerico}/`, {
+                    method: 'DELETE',
+                });
+                if (response.ok) {
+                    alert("Formulário deletado com sucesso!");
+                    setFormularios(formularios.filter(form => form.id !== formId));
+                } else {
+                    console.error("Falha ao deletar o formulário. Status:", response.status);
+                    alert("Não foi possível deletar o formulário.");
+                }
+            } catch (error) {
+                console.error("Erro ao desativar formulário:", error)
+            }
+        })
     };
 
     const clickOpen = () => {
-        setDadosFormulario(null);
-        setIsModalOpen(true);
+        requireAuth(() => {
+            setDadosFormulario(null);
+            setIsModalOpen(true);
+        });
     };
 
     const clickClose = () => {
@@ -111,32 +118,42 @@ export default function Lista() {
     };
 
     const pageChange = (novaPagina) => {
-        if (novaPagina > 0 && novaPagina <= totalPaginas) {
-            setPaginaAtual(novaPagina);
-        }
+        requireAuth(async () => {
+            if (novaPagina > 0 && novaPagina <= totalPaginas) {
+                setPaginaAtual(novaPagina);
+            }
+        });
     };
 
     const filtroChange = (e) => {
-        const {name, value} = e.target;
-        setFiltros(prev => ({...prev, [name]: value}));
-        setPaginaAtual(1);
+        requireAuth(async () => {
+            const {name, value} = e.target;
+            setFiltros(prev => ({...prev, [name]: value}));
+            setPaginaAtual(1);
+        });
     };
 
     const ordenacaoChange = (e) => {
-        const {name, value} = e.target;
-        setOrdenacao(prev => ({...prev, [name]: value}));
-        setPaginaAtual(1);
+        requireAuth(async () => {
+            const {name, value} = e.target;
+            setOrdenacao(prev => ({...prev, [name]: value}));
+            setPaginaAtual(1);
+        });
     };
 
     const limparFiltros = () => {
-        setFiltros({nome: '', schema_version: '', data_fim: '', data_inicio: ''});
-        setOrdenacao({ordenar_por: 'data_criacao', ordem: 'desc'});
-        setPaginaAtual(1);
+        requireAuth(async () => {
+            setFiltros({nome: '', schema_version: '', data_criacao: '',});
+            setOrdenacao({ordenar_por: 'data_criacao', ordem: 'desc'});
+            setPaginaAtual(1);
+        });
     };
 
     const abrirModalResposta = (form) => {
-        setFormParaResponder(form);
-        setIsRespostaModalOpen(true);
+        requireAuth(async () => {
+            setFormParaResponder(form);
+            setIsRespostaModalOpen(true);
+        });
     };
 
     const fecharModalResposta = () => {
@@ -166,18 +183,15 @@ export default function Lista() {
                            onChange={filtroChange}/>
                 </div>
                 <div>
-                    <label htmlFor="data_inicio" className="block text-sm font-medium text-gray-700">Criado de</label>
-                    <input type="date" name="data_inicio" id="data_inicio"
-                           className="mt-1 p-2 w-full border rounded-md"
-                           value={filtros.data_inicio}
-                           onChange={filtroChange}/>
-                </div>
-                <div>
-                    <label htmlFor="data_fim" className="block text-sm font-medium text-gray-700">Criado até</label>
-                    <input type="date" name="data_fim" id="data_fim"
-                           className="mt-1 p-2 w-full border rounded-md"
-                           value={filtros.data_fim}
-                           onChange={filtroChange}/>
+                    <label htmlFor="data_criacao" className="block text-sm font-medium text-gray-700">Criado em</label>
+                    <input
+                        type="date"
+                        name="data_criacao"
+                        id="data_criacao"
+                        className="mt-1 p-2 w-full border rounded-md"
+                        value={filtros.data_criacao}
+                        onChange={filtroChange}
+                    />
                 </div>
                 <div>
                     <label htmlFor="ordenar_por" className="block text-sm font-medium text-gray-700">Ordenar por</label>
@@ -278,7 +292,8 @@ export default function Lista() {
             )}
 
             {isModalOpen && <Modal onClose={clickClose} dadosIniciais={dadosFormulario}/>}
-            {isRespostaModalOpen && <RespostaModal formParaResponder={formParaResponder} onClose={fecharModalResposta} />}
+            {isRespostaModalOpen &&
+                <RespostaModal formParaResponder={formParaResponder} onClose={fecharModalResposta}/>}
         </div>
     );
 }
