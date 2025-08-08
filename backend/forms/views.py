@@ -9,6 +9,7 @@ from .models import FormularioSchemas, Campo, Formulario
 from .serializers import FormularioCreateSerializer, FormularioDetailSerializer, FormularioListSerializer, FormularioUpdateSerializer, RespostaSerializer
 from .filters import FormularioFilter
 from .pagination import FormularioPagination
+from rest_framework.permissions import AllowAny
 
 class FormularioCreateView(APIView):
 
@@ -59,6 +60,7 @@ class FormularioListView(generics.ListAPIView):
     pagination_class = FormularioPagination
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FormularioFilter
+    permission_classes = [AllowAny]
 
     ordering_fields = ['formulario__nome', 'data_criacao']
     ordering = ['-formulario__nome', '-schema_version']
@@ -67,6 +69,7 @@ class FormularioDetailView(generics.RetrieveAPIView):
     queryset = Formulario.objects.filter(data_remocao__isnull=True).distinct()
     serializer_class = FormularioDetailSerializer
     lookup_field = 'id'
+    permission_classes = [AllowAny]
 
 
     def get_serializer_context(self):
