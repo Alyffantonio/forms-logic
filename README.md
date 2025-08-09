@@ -62,8 +62,19 @@
 > - **Docker** (backend + frontend)
 > - **Docker Compose**
 > - **Nginx** (para build estático do frontend)
->
+>-  **Redis é executado como um serviço separado no `docker-compose.yml` e é iniciado automaticamente junto com a aplicação. O backend já está configurado para se conectar a ele através da rede interna do Docker.
 > ---
+> ## ⚡ Sistema de Cache com Redis
+> Para otimizar a performance e reduzir a carga no banco de dados, o projeto implementa uma camada de cache utilizando **Redis**.
+>
+> ### 🧠 Como Funciona
+> - **Tecnologia**: O backend utiliza a biblioteca `django-redis` para se comunicar com um container Redis.
+> - **Endpoints Cacheados**: As rotas de listagem e detalhe de formulários, que são operações de leitura frequentes, são cacheadas por **15 minutos**.
+>   - `GET /formularios/`
+>   - `GET /formularios/<id>/versao/<version>/`
+>   - **Invalidação Automática**: O cache é automaticamente limpo (invalidado) sempre que uma operação de escrita ocorre (criação, atualização ou exclusão de um formulário), garantindo que os dados servidos nunca estejam >     desatualizados.
+>
+>
 >
 > ## 🔌 Endpoints Principais da API
 > - `GET /formularios/` → Lista todos os formulários
