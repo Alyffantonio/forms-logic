@@ -10,6 +10,10 @@ from .serializers import FormularioCreateSerializer, FormularioDetailSerializer,
 from .filters import FormularioFilter
 from .pagination import FormularioPagination
 from rest_framework.permissions import AllowAny
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+
 
 class FormularioCreateView(APIView):
 
@@ -51,8 +55,11 @@ class FormularioCreateView(APIView):
             "mensagem": "Formulário criado com sucesso",
             "criado_em": formulario.data_criacao.isoformat(),
         }
+        limpar_cache_lista()
         return Response(resposta_sucesso, status=status.HTTP_201_CREATED)
 
+
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class FormularioListView(generics.ListAPIView):
     queryset = FormularioSchemas.objects.filter(formulario__data_remocao__isnull=True).select_related('formulario')
 
@@ -65,6 +72,7 @@ class FormularioListView(generics.ListAPIView):
     ordering_fields = ['formulario__nome', 'data_criacao']
     ordering = ['-formulario__nome', '-schema_version']
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class FormularioDetailView(generics.RetrieveAPIView):
     queryset = Formulario.objects.filter(data_remocao__isnull=True).distinct()
     serializer_class = FormularioDetailSerializer
@@ -119,7 +127,8 @@ class FormularioUpdateView(generics.UpdateAPIView):
                     validacoes=campo.get("validacoes", []),
                     opcoes=campo.get("opcoes", []),
                 )
-
+        limpar_cache_lista()
+        cache.delete(f"/api/v1/formularios/{formulario.id}/")
         return Response(
             {
                 "id": formulario.id,
@@ -163,11 +172,12 @@ class FormularioDeleteView(generics.DestroyAPIView):
                 "mensagem": f"Erro interno ao marcar o formulário como removido: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        limpar_cache_lista()
+        cache.delete(f"/api/v1/formularios/{formulario.id}/")
         return Response({
             "mensagem": f"Formulário '{formulario.string_id}' marcado como removido com sucesso. Nenhuma resposta foi excluída.",
             "status": "soft_deleted"
         }, status=status.HTTP_200_OK)
-
 
 class RespostaCreateView(generics.CreateAPIView):
     serializer_class = RespostaSerializer
@@ -192,3 +202,7 @@ class RespostaCreateView(generics.CreateAPIView):
             "calculados": self.created_instance.calculados,
             "executado_em": self.created_instance.criado_em.isoformat(),
         }, status=status.HTTP_201_CREATED)
+
+
+def limpar_cache_lista():
+    cache.delete_pattern("/api/v1/formularios/*")
